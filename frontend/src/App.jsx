@@ -610,10 +610,10 @@ function App() {
             </div>
             <div className="flex flex-col gap-4 text-sm text-slate-800 dark:text-slate-200">
               <a
-                href="mailto:hello@synklab.com"
+                href="mailto:Synklab.service@hotmail.com"
                 className="inline-flex items-center justify-center rounded-full border border-slate-300 px-6 py-3 font-semibold text-slate-900 transition-colors hover:border-slate-400 dark:border-slate-800 dark:text-slate-100 dark:hover:border-slate-600"
               >
-                hello@synklab.com
+                Synklab.service@hotmail.com
               </a>
               <a
                 href="tel:+212763327811"
@@ -637,8 +637,8 @@ function App() {
             <a href="https://github.com/s1vrn" className="hover:text-slate-700 dark:hover:text-slate-300" target="_blank" rel="noreferrer">
               s1vrn
             </a>
-            <a href="mailto:hello@synklab.com" className="hover:text-slate-700 dark:hover:text-slate-300">
-              hello@synklab.com
+            <a href="mailto:Synklab.service@hotmail.com" className="hover:text-slate-700 dark:hover:text-slate-300">
+              Synklab.service@hotmail.com
             </a>
             <a href="#insights" className="hover:text-slate-700 dark:hover:text-slate-300">
               Latest insights
