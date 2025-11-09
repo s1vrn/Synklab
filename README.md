@@ -49,6 +49,21 @@ CLIENT_ORIGIN=http://localhost:5173     # optional: tighten CORS
 
 The newsletter form calls the backend endpoint, which relays the request to Mailchimp using these credentials.
 
+## Deploying to Vercel
+
+This repo is configured for a monorepo deploy:
+
+- `frontend/` → built with `@vercel/static-build` (Vite output served as static assets).
+- `backend/api/*.js` → deployed as Vercel Serverless Functions (Express server remains for local development).
+
+Steps:
+
+1. Push the latest changes to GitHub.
+2. In Vercel, create a new project pointing to this repository.
+3. Set the root directory to the repository root (so the provided `vercel.json` is used).
+4. Define the environment variables listed above in the Vercel project settings.
+5. Trigger a deploy; Vercel will build the frontend and provision `/api/*` routes automatically.
+
 ## Inspiration
 
 Design language inspired by [SEO Specialist](https://www.seospecialist.ma/) while tailored to SynkLab’s brand voice.
