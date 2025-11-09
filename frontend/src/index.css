@@ -14,6 +14,16 @@
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
+  *, *::before, *::after {
+    @apply transition-colors duration-300;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      @apply !transition-none;
+    }
+  }
+
   a {
     @apply text-sky-500 transition-colors hover:text-sky-400 dark:text-sky-300 dark:hover:text-sky-200;
   }
