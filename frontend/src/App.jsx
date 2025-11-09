@@ -144,6 +144,8 @@ function App() {
   const [apiError, setApiError] = useState(null)
   const [theme, setTheme] = useState(getInitialTheme)
   const [showThemePrompt, setShowThemePrompt] = useState(() => (getStoredTheme() ? false : true))
+  const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [newsletterStatus, setNewsletterStatus] = useState('idle')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -217,6 +219,44 @@ function App() {
   const dismissThemePrompt = () => setShowThemePrompt(false)
 
   const themeIsDark = theme === 'dark'
+  const newsletterMessage =
+    newsletterStatus === 'submitted'
+      ? 'Thanks for subscribing. You’ll hear from us soon.'
+      : newsletterStatus === 'error'
+        ? 'Unable to subscribe right now. Please try again.'
+        : newsletterStatus === 'invalid'
+          ? 'Please enter a valid email address.'
+          : null
+
+  const handleNewsletterSubmit = async (event) => {
+    event.preventDefault()
+    if (!newsletterEmail.trim() || !newsletterEmail.includes('@')) {
+      setNewsletterStatus('invalid')
+      return
+    }
+
+    try {
+      setNewsletterStatus('loading')
+      const response = await fetch(`${API_BASE_URL}/api/newsletter`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail.trim() }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Request failed')
+      }
+
+      setNewsletterStatus('submitted')
+      setNewsletterEmail('')
+    } catch (error) {
+      console.error('Newsletter subscription failed', error)
+      setNewsletterStatus('error')
+    }
+  }
+
+  const newsletterButtonLabel = newsletterStatus === 'loading' ? 'Joining...' : 'Join'
+  const newsletterDisabled = newsletterStatus === 'loading'
 
   return (
     <div className="min-h-screen bg-white text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -363,7 +403,7 @@ function App() {
 
         <section id="work" className="space-y-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
+      <div>
               <p className="text-sm uppercase tracking-[0.35em] text-slate-500 dark:text-slate-500">Featured Work</p>
               <h2 className="mt-2 text-3xl font-semibold text-slate-950 sm:text-4xl dark:text-slate-50">Outcomes with our partners</h2>
             </div>
@@ -428,7 +468,7 @@ function App() {
             </div>
             <p className="max-w-xl text-base text-slate-600 dark:text-slate-400">
               Designers, engineers, and security specialists collaborating shoulder-to-shoulder to ship resilient experiences.
-            </p>
+        </p>
       </div>
           {apiError ? (
             <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 px-5 py-4 text-sm text-amber-200">{apiError}</div>
@@ -499,6 +539,57 @@ function App() {
                 </a>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section id="newsletter" className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm transition-colors dark:border-slate-900 dark:bg-slate-900/40 dark:shadow-none sm:p-12">
+          <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+            <div className="space-y-4">
+              <p className="text-sm uppercase tracking-[0.35em] text-slate-500 dark:text-slate-500">Newsletter</p>
+              <h2 className="text-3xl font-semibold text-slate-950 sm:text-4xl dark:text-slate-50">Ship Notes in your inbox</h2>
+              <p className="text-base text-slate-600 dark:text-slate-400">
+                A monthly digest covering performance wins, security tactics, and design systems that keep SynkLab’s products resilient.
+              </p>
+              {newsletterMessage ? (
+                <p
+                  className={`text-sm ${
+                    newsletterStatus === 'submitted'
+                      ? 'text-emerald-600 dark:text-emerald-300'
+                      : 'text-amber-600 dark:text-amber-300'
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {newsletterMessage}
+                </p>
+              ) : null}
+            </div>
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col gap-4 sm:flex-row">
+              <label htmlFor="newsletter-email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="newsletter-email"
+                type="email"
+                value={newsletterEmail}
+                onChange={(event) => {
+                  setNewsletterEmail(event.target.value)
+                  if (newsletterStatus !== 'idle') {
+                    setNewsletterStatus('idle')
+                  }
+                }}
+                placeholder="you@company.com"
+                className="w-full rounded-full border border-slate-300 bg-white px-5 py-3 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:ring-sky-500"
+                disabled={newsletterDisabled}
+              />
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center rounded-full border border-sky-500 bg-sky-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-80 dark:border-sky-400 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
+                disabled={newsletterDisabled}
+              >
+                {newsletterButtonLabel}
+              </button>
+            </form>
           </div>
         </section>
 

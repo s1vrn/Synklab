@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
+const mailchimp = require('mailchimp-marketing')
 
 const app = express()
 const port = process.env.PORT || 4000
@@ -12,6 +13,25 @@ app.use(
   }),
 )
 app.use(express.json())
+
+const {
+  MAILCHIMP_API_KEY: mailchimpApiKey,
+  MAILCHIMP_SERVER_PREFIX: mailchimpServerPrefix,
+  MAILCHIMP_AUDIENCE_ID: mailchimpAudienceId,
+} = process.env
+
+const mailchimpConfigured = Boolean(mailchimpApiKey && mailchimpServerPrefix)
+
+if (mailchimpConfigured) {
+  mailchimp.setConfig({
+    apiKey: mailchimpApiKey,
+    server: mailchimpServerPrefix,
+  })
+} else {
+  console.warn(
+    'Mailchimp is not fully configured. Set MAILCHIMP_API_KEY and MAILCHIMP_SERVER_PREFIX to enable newsletter signups.',
+  )
+}
 
 const team = [
   {
@@ -68,6 +88,38 @@ app.get('/api/team', (_req, res) => {
 
 app.get('/api/showcase', (_req, res) => {
   res.json({ projects: showcase })
+})
+
+app.post('/api/newsletter', async (req, res) => {
+  const { email } = req.body || {}
+
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    return res.status(400).json({ error: 'A valid email address is required.' })
+  }
+
+  if (!mailchimpConfigured || !mailchimpAudienceId) {
+    return res.status(503).json({
+      error: 'Newsletter signup is temporarily unavailable.',
+    })
+  }
+
+  try {
+    await mailchimp.lists.addListMember(mailchimpAudienceId, {
+      email_address: email.trim(),
+      status: 'subscribed',
+    })
+
+    return res.status(200).json({ message: 'Successfully subscribed.' })
+  } catch (error) {
+    if (error?.response?.body?.title === 'Member Exists') {
+      return res.status(200).json({ message: 'You are already on the list.' })
+    }
+
+    console.error('Mailchimp error:', error)
+    return res.status(502).json({
+      error: 'Unable to subscribe right now. Please try again later.',
+    })
+  }
 })
 
 app.use((req, res) => {

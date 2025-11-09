@@ -28,11 +28,26 @@ The frontend reads API data from `VITE_API_BASE_URL` (defaults to `http://localh
 - `GET /api/status` – health and environment info
 - `GET /api/team` – team members used on the About section
 - `GET /api/showcase` – featured project portfolio details
+- `POST /api/newsletter` – subscribes an email to the Mailchimp audience (requires API keys)
 
 ## Deployment Notes
 
 1. Build frontend: `cd frontend && npm run build` (outputs to `frontend/dist`)
 2. Deploy the Express app alongside the static build, or host the frontend separately (e.g. Vercel/Netlify) and set `VITE_API_BASE_URL`.
+
+## Environment Setup
+
+Create a `.env` file in `backend/` (or provide the variables in your hosting environment):
+
+```
+PORT=4000
+MAILCHIMP_API_KEY=your-mailchimp-api-key
+MAILCHIMP_SERVER_PREFIX=usX             # e.g. us21
+MAILCHIMP_AUDIENCE_ID=your-audience-id  # list / audience ID
+CLIENT_ORIGIN=http://localhost:5173     # optional: tighten CORS
+```
+
+The newsletter form calls the backend endpoint, which relays the request to Mailchimp using these credentials.
 
 ## Inspiration
 
